@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Functional & Non-functional Arcade Game Requirements</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- PDF Generation Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <style>
+        :root {
+            --primary-color: #4CAF50; /* Green */
+            --secondary-color: #FFC107; /* Amber */
+            --background-color: #121212; /* Dark background */
+            --light-bg: #1E1E1E;
+            --text-color: #E0E0E0;
+            --arcade-font: 'Press Start 2P', cursive;
+            --instruction-color: #82aaff; /* A clear, readable blue */
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        
+        /* Animated background */
+        .stars {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            width: 100%; height: 100%;
+            display: block;
+            z-index: -1;
+        }
+        .star {
+            position: absolute;
+            width: 2px; height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite ease-in-out;
+        }
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            background: rgba(22, 27, 34, 0.9);
+            border: 2px solid var(--primary-color);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 0 20px rgba(74, 144, 226, 0.5);
+        }
+
+        h1, h2, h3, h4 {
+            font-family: var(--arcade-font);
+            color: var(--primary-color);
+            text-shadow: 2px 2px #000;
+        }
+        
+        h1 { font-size: 1.8em; text-align: center; margin-bottom: 20px;}
+        h2 { font-size: 1.4em; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 20px;}
+        h3 { font-size: 1.1em; color: var(--secondary-color); margin-top: 20px;}
+        h4 { font-size: 1em; color: var(--primary-color);}
+        
+        .instruction-box {
+            background-color: rgba(74, 144, 226, 0.1);
+            border-left: 4px solid var(--instruction-color);
+            padding: 15px;
+            margin-bottom: 25px;
+            border-radius: 5px;
+        }
+        .instruction-box p {
+            margin: 0;
+            font-weight: bold;
+            color: var(--instruction-color); /* Updated color for instructions */
+        }
+
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+        .nav-tab {
+            padding: 10px 15px;
+            background: #333;
+            border: 2px solid #555;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: var(--text-color);
+            font-weight: bold;
+        }
+        .nav-tab.active, .nav-tab:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: #fff;
+            transform: scale(1.05);
+        }
+
+        /* Content Sections */
+        .section {
+            display: none;
+            padding: 20px;
+            background: #222;
+            border-radius: 10px;
+            border: 1px solid #444;
+            animation: fadeIn 0.5s;
+        }
+        .section.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Timer Styling */
+        .floating-timer {
+            position: fixed;
+            top: 25px;
+            right: 25px;
+            background: var(--light-bg);
+            color: var(--primary-color);
+            font-family: var(--arcade-font);
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: 2px solid var(--primary-color);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            font-size: 1.5em;
+            cursor: pointer;
+            z-index: 1000;
+            user-select: none;
+        }
+        .floating-timer.paused {
+            color: #888;
+            border-color: #555;
+        }
+        .floating-timer.finished {
+            color: var(--secondary-color);
+            border-color: var(--secondary-color);
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        /* Form elements */
+        textarea, input[type="text"], select {
+            width: 100%;
+            padding: 10px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            color: var(--text-color);
+            border-radius: 6px;
+            font-family: 'Roboto', sans-serif;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            transform: scale(1.5);
+            margin: 0;
+        }
+
+        /* Buttons */
+        .btn {
+            font-family: var(--arcade-font);
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+        }
+        .btn-primary { background-color: var(--primary-color); color: white; border: 2px solid #fff; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.3); }
+        .btn:disabled { background: #555; color: #999; cursor: not-allowed; transform: none; border: 2px solid #777; }
+        
+        .download-button-container {
+            text-align: center;
+            margin-top: 30px;
+            border-top: 1px dashed #444;
+            padding-top: 20px;
+        }
+        
+        /* Specific Activity Styles */
+        .entry-ticket, .quiz-container, .game-container-wrapper, .collab-section, .journal {
+             background: #2a2a2a; padding: 20px; border-radius: 10px; margin-top:20px;
+        }
+         .requirements-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .requirements-table th, .requirements-table td {
+            padding: 12px;
+            border: 1px solid #30363d;
+            text-align: left;
+        }
+         .requirements-table th { background: #21262d; }
+         .quiz-option, .quiz-options .quiz-option {
+            display: block; margin: 10px 0; padding: 10px; background: #333;
+            border: 2px solid #555; border-radius: 8px; cursor: pointer; transition: all 0.3s;
+        }
+        .quiz-option.selected, .quiz-option:hover {
+            border-color: var(--primary-color);
+            background-color: #3e5064;
+        }
+        #gameAnalysis { margin-top: 30px; }
+        #gameAnalysis input { margin-bottom: 10px; }
+        .peer-review { margin-top: 15px; }
+        .review-item { display: flex; align-items: center; margin-bottom: 10px; }
+        .review-checkbox { width: auto; margin-right: 10px; }
+
+        .drag-drop-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .drop-zone {
+            min-height: 150px;
+            padding: 15px;
+            border: 2px dashed #444;
+            border-radius: 10px;
+            transition: background-color 0.2s;
+        }
+        .drop-zone.drag-over { background-color: #333; }
+        .draggable-item {
+            padding: 10px;
+            margin: 5px 0;
+            background: #3a3a3a;
+            border: 1px solid #555;
+            border-radius: 5px;
+            cursor: grab;
+        }
+        .draggable-item.correct { border-left: 3px solid #4caf50; }
+        .draggable-item.incorrect { border-left: 3px solid #f44336; }
+        .dragging { opacity: 0.5; }
+
+        .game-container {
+            background: #000;
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 20px;
+        }
+        #gameCanvas {
+            background: #000;
+            border: 2px solid var(--primary-color);
+            max-width: 100%;
+        }
+        .game-controls button { margin: 5px; }
+
+        .feedback {
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 8px;
+            display: none;
+            color: white;
+            font-weight: bold;
+        }
+        .feedback.success { background-color: #2e7d32; }
+        .feedback.error { background-color: #b71c1c; }
+        .feedback.info { background-color: #1565c0; }
+    </style>
+</head>
+<body>
+    <div class="stars"></div>
+
+    <div class="container" id="main-content">
+        <header class="header">
+            <h1>🎮 Functional & Non-functional Requirements</h1>
+            <div class="game-stats">
+                <div class="stat-item"><span>⭐</span> <span id="points">0</span> Points</div>
+                <div class="stat-item"><span>📊</span> <span id="level">Level 1</span></div>
+                <div class="stat-item"><span>🔥</span> <span id="streak">0</span> Streak</div>
+            </div>
+        </header>
+
+        <div class="nav-tabs">
+            <button class="nav-tab active" data-section-id="section1">1. Entry Ticket</button>
+            <button class="nav-tab" data-section-id="section2">2. Concepts</button>
+            <button class="nav-tab" data-section-id="section3">3. Play & Analyse</button>
+            <button class="nav-tab" data-section-id="section4">4. Apply Knowledge</button>
+            <button class="nav-tab" data-section-id="section5">5. Collaborate</button>
+            <button class="nav-tab" data-section-id="section6">6. Reflect</button>
+        </div>
+
+        <!-- Section 1: Entry Ticket -->
+        <section class="section active" id="section1">
+            <h2>Entry Ticket - Test Your Prior Knowledge</h2>
+            <div class="instruction-box">
+                <p><strong>Instructions:</strong> Answer the two questions below based on what you already know. There are no wrong answers! This is to see what you think before we start the lesson.</p>
+            </div>
+            <div class="entry-ticket">
+                <p><strong>Learning Intention:</strong> We will explore how games have functional and non-functional requirements.</p>
+                <p><strong>Success Criteria:</strong> You will be able to explain the functional and non-functional requirements of a game.</p>
+                <div style="margin-top: 20px;">
+                    <label for="priorKnowledge1"><strong>What are Functional and Non-functional requirements?</strong></label>
+                    <textarea class="ticket-input" id="priorKnowledge1" rows="4" placeholder="Type your answer here... Think about what a system MUST DO vs HOW it does it..."></textarea>
+                </div>
+                <div style="margin-top: 20px;">
+                    <label for="priorKnowledge2"><strong>How can this be related to a game that you know?</strong></label>
+                    <textarea class="ticket-input" id="priorKnowledge2" rows="4" placeholder="Think of your favourite game... What must it do? How should it perform?"></textarea>
+                </div>
+                <button class="btn btn-primary" onclick="submitEntryTicket()">Submit Entry Ticket 🚀</button>
+                <div class="feedback" id="entryFeedback"></div>
+            </div>
+             <div class="download-button-container">
+                <button class="btn btn-primary" onclick="downloadSectionAsPDF('section1', this)">Download Entry Ticket</button>
+            </div>
+        </section>
+
+        <!-- Section 2: Learn the Concepts -->
+        <section class="section" id="section2">
+            <h2>Understanding Requirements</h2>
+            <div class="instruction-box">
+                 <p><strong>Instructions:</strong> First, watch the short video below. Then, drag each of the requirement cards from the box into either the 'Functional' or 'Non-functional' category. Click 'Check My Sorting' when you are done.</p>
+            </div>
+             <!-- YouTube Video Embed Start -->
+            <div class="quiz-container">
+                <h3>🎥 Watch & Learn</h3>
+                <p>This video explains the difference between functional and non-functional requirements.</p>
+                <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; background: #000; border-radius: 8px; margin: 20px 0;">
+                    <iframe 
+                        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"
+                        src="https://www.youtube.com/embed/PtJmjPkrSUE" 
+                        title="YouTube video player" 
+                        frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowfullscreen>
+                    </iframe>
+                </div>
+            </div>
+            <!-- YouTube Video Embed End -->
+            <div id="requirementsToSort" style="background: var(--light-bg); padding: 20px; border-radius: 10px; margin: 20px 0; min-height: 50px;">
+                <div class="draggable-item" draggable="true" id="drag1" data-type="functional">Player can move left and right</div>
+                <div class="draggable-item" draggable="true" id="drag2" data-type="non-functional">Game runs at 60 FPS</div>
+                <div class="draggable-item" draggable="true" id="drag3" data-type="functional">Score increases when enemy is destroyed</div>
+                <div class="draggable-item" draggable="true" id="drag4" data-type="non-functional">Appealing retro graphics</div>
+                <div class="draggable-item" draggable="true" id="drag5" data-type="functional">Game ends when player loses all lives</div>
+                <div class="draggable-item" draggable="true" id="drag6" data-type="non-functional">Easy to learn, hard to master</div>
+            </div>
+            <div class="drag-drop-container">
+                <div class="drop-zone" id="functionalDrop" data-type="functional"><h3>✅ Functional Requirements</h3><p style="color: #888;">(WHAT the game does)</p></div>
+                <div class="drop-zone" id="nonFunctionalDrop" data-type="non-functional"><h3>🎨 Non-functional Requirements</h3><p style="color: #888;">(HOW it does it)</p></div>
+            </div>
+            <button class="btn btn-success" onclick="checkSorting()">Check My Sorting ✔️</button>
+            <div class="feedback" id="sortingFeedback"></div>
+            <div class="download-button-container">
+                <button class="btn btn-primary" onclick="downloadSectionAsPDF('section2', this)">Download Sorting Activity</button>
+            </div>
+        </section>
+
+        <!-- Section 3: Space Invaders Analysis -->
+        <section class="section" id="section3">
+            <h2>Space Invaders - A Classic Case Study</h2>
+             <div class="instruction-box">
+                <p><strong>Instructions:</strong> Play the mini Space Invaders game below. Then, fill out the tables to analyze its functional requirements (what it does) and rate its non-functional requirements (how well it does it).</p>
+            </div>
+            <div class="game-container">
+                 <h3 style="color: #00ff00; text-align: center; font-family: var(--arcade-font);">🚀 SPACE INVADERS MINI 🚀</h3>
+                 <canvas id="gameCanvas" width="600" height="400"></canvas>
+                 <div class="game-controls">
+                     <button class="btn btn-success" onclick="startGame()">Start Game</button>
+                     <button class="btn btn-warning" onclick="pauseGame()">Pause/Resume</button>
+                     <button class="btn btn-primary" onclick="resetGame()">Reset</button>
+                 </div>
+                 <p style="color: #00ff00; text-align: center; margin-top: 10px;">Use ← → arrow keys to move | SPACE to shoot</p>
+            </div>
+            <h3>📋 Functional Requirements Analysis</h3>
+            <table class="requirements-table">
+                <thead><tr><th>Test Case</th><th>Expected Behaviour</th><th>✓ Verified</th></tr></thead>
+                <tbody>
+                    <tr><td>Player presses left, right keys</td><td><input type="text" class="table-input" id="func2" placeholder="e.g., The player's ship moves horizontally."></td><td style="text-align: center;"><input type="checkbox" id="funcCheck2"></td></tr>
+                    <tr><td>Player presses space bar</td><td><input type="text" class="table-input" id="func3" placeholder="e.g., A laser shoots from the ship."></td><td style="text-align: center;"><input type="checkbox" id="funcCheck3"></td></tr>
+                    <tr><td>Laser hits an invader</td><td><input type="text" class="table-input" id="func4" placeholder="e.g., The invader disappears and score increases."></td><td style="text-align: center;"><input type="checkbox" id="funcCheck4"></td></tr>
+                    <tr><td>Invaders reach the bottom</td><td><input type="text" class="table-input" id="func5" placeholder="e.g., The game is over."></td><td style="text-align: center;"><input type="checkbox" id="funcCheck5"></td></tr>
+                </tbody>
+            </table>
+            <h3>🌟 Non-functional Requirements Rating</h3>
+            <table class="requirements-table">
+                <thead><tr><th>Requirement</th><th>Rating (1-5 ⭐)</th><th>Your Justification</th></tr></thead>
+                <tbody>
+                    <tr><td>Usability (Easy to learn)</td><td><select class="table-input" id="nf1"><option value="">Select...</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select></td><td><input type="text" class="table-input" placeholder="e.g., Simple controls make it easy to start."></td></tr>
+                    <tr><td>Performance (Smoothness)</td><td><select class="table-input" id="nf3"><option value="">Select...</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select></td><td><input type="text" class="table-input" placeholder="e.g., The game runs without lag."></td></tr>
+                    <tr><td>Aesthetics (Visual Appeal)</td><td><select class="table-input" id="nf5"><option value="">Select...</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select></td><td><input type="text" class="table-input" placeholder="e.g., The pixel art style is iconic."></td></tr>
+                </tbody>
+            </table>
+            <div class="download-button-container">
+                <button class="btn btn-primary" onclick="downloadSectionAsPDF('section3', this)">Download Analysis</button>
+            </div>
+        </section>
+
+        <!-- Section 4: Apply Your Knowledge -->
+        <section class="section" id="section4">
+            <h2>Apply Your Knowledge - Design Challenge</h2>
+            <div class="instruction-box">
+                <p><strong>Instructions:</strong> Choose one of the classic games listed below. Then, write three functional requirements and three non-functional requirements for that game in the text boxes provided.</p>
+            </div>
+            <div class="quiz-container">
+                <h3>🎮 Your Turn: Choose a Classic Game</h3>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="selectGame(this, 'Pac-Man')"><strong>👻 Pac-Man</strong></div>
+                    <div class="quiz-option" onclick="selectGame(this, 'Tetris')"><strong>🧱 Tetris</strong></div>
+                    <div class="quiz-option" onclick="selectGame(this, 'Pong')"><strong>🏓 Pong</strong></div>
+                </div>
+            </div>
+            <div id="gameAnalysis" style="display: none; margin-top: 30px;">
+                <h3>📝 Analyse <span id="chosenGameName">Your Chosen Game</span></h3>
+                <div style="background: #2a2a2a; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                    <h4>List 3 Functional Requirements:</h4>
+                    <ol>
+                        <li><input type="text" class="table-input" placeholder="e.g., The player character moves up, down, left, right."></li>
+                        <li><input type="text" class="table-input" placeholder="e.g., Collecting a power-up changes ghost behavior."></li>
+                        <li><input type="text" class="table-input" placeholder="e.g., The game ends when all lives are lost."></li>
+                    </ol>
+                </div>
+                <div style="background: #2a2a2a; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                    <h4>List 3 Non-functional Requirements:</h4>
+                    <ol>
+                        <li><input type="text" class="table-input" placeholder="e.g., The controls must be responsive with less than 50ms delay."></li>
+                        <li><input type="text" class="table-input" placeholder="e.g., The game must maintain a consistent frame rate of 30 FPS."></li>
+                        <li><input type="text" class="table-input" placeholder="e.g., The sound effects should provide clear feedback for actions."></li>
+                    </ol>
+                </div>
+            </div>
+            <div class="download-button-container">
+                <button class="btn btn-primary" onclick="downloadSectionAsPDF('section4', this)">Download My Design</button>
+            </div>
+        </section>
+
+        <!-- Section 5: Collaboration & Peer Review -->
+        <section class="section" id="section5">
+            <h2>Collaborate & Review</h2>
+             <div class="instruction-box">
+                <p><strong>Instructions:</strong> After completing the 'Apply Your Knowledge' activity, download it as a PDF and share it with a partner. Then, use the checklist below to review their work and provide them with constructive feedback in the text area.</p>
+            </div>
+            <div class="collab-section">
+                <h3>👥 Peer Review Checklist</h3>
+                <div class="peer-review">
+                    <div class="review-item"><input type="checkbox" id="peer1"><label for="peer1">Functional requirements clearly describe WHAT the game does.</label></div>
+                    <div class="review-item"><input type="checkbox" id="peer2"><label for="peer2">Non-functional requirements clearly describe HOW it performs.</label></div>
+                    <div class="review-item"><input type="checkbox" id="peer3"><label for="peer3">Requirements are specific and measurable.</label></div>
+                </div>
+                <div style="margin-top: 20px;">
+                    <label for="peerFeedback"><strong>Feedback for your partner:</strong></label>
+                    <textarea class="journal-entry" id="peerFeedback" placeholder="What did they do well? Are their requirements clear and testable? What could be improved?"></textarea>
+                </div>
+            </div>
+            <div class="download-button-container">
+                <button class="btn btn-primary" onclick="downloadSectionAsPDF('section5', this)">Download Feedback</button>
+            </div>
+        </section>
+
+        <!-- Section 6: Reflection & Achievement -->
+        <section class="section" id="section6">
+            <h2>Reflection & Achievements</h2>
+            <div class="instruction-box">
+                <p><strong>Instructions:</strong> Reflect on what you've learned by answering the questions below. This is your chance to think about how these concepts apply to your own projects.</p>
+            </div>
+            <div class="journal">
+                <h3>💭 Reflection Journal</h3>
+                <label for="reflection1"><strong>What is the most important difference between functional and non-functional requirements?</strong></label>
+                <textarea class="journal-entry" id="reflection1" placeholder="Think about WHAT vs HOW..."></textarea>
+                <label for="reflection2" style="margin-top: 20px; display: block;"><strong>How will understanding requirements help you in your game development project?</strong></label>
+                <textarea class="journal-entry" id="reflection2" placeholder="Consider planning, testing, and evaluation..."></textarea>
+            </div>
+             <div class="download-button-container">
+                <button class="btn btn-primary" onclick="downloadSectionAsPDF('section6', this)">Download My Reflection</button>
+            </div>
+        </section>
+    </div>
+    
+    <div class="floating-timer" id="activityTimer" onclick="toggleTimer()">
+       <span id="time-display">15:00</span>
+    </div>
+    <audio id="buzzer" src="data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU Rockoora_ui-sound-design-sfx-alarm-02.wav"></audio>
+    <audio id="successSound" src="data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU Rockoora_ui-sound-design-sfx-correct-answer-01.wav"></audio>
+
+    <script>
+        // ===================================================================================
+        // YEAR 9 COMPUTING - JAVASCRIPT ACTIVITY
+        // ===================================================================================
+        // Welcome, students! Your task is to bring this webpage to life by completing
+        // the JavaScript functions below.
+        //
+        // Read the comments carefully for each task. They will guide you on what to do.
+        // Don't be afraid to experiment! If you get stuck, ask a classmate or your teacher.
+        // Good luck, and have fun!
+        // ===================================================================================
+
+
+        // --- State Management (Teacher-provided) ---
+        // These variables store the state of our page, like points and the current section.
+        let currentSectionId = 'section1';
+        let points = 0;
+        let streak = 0;
+        let level = 1;
+        
+        // --- Timer Functionality (Teacher-provided) ---
+        const TIME_LIMIT = 900; // 15 minutes in seconds
+        const buzzer = document.getElementById('buzzer');
+        const successSound = document.getElementById('successSound');
+        let sectionTimers = {};
+        
+        function initializeTimers() {
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                const sectionId = tab.dataset.sectionId;
+                sectionTimers[sectionId] = {
+                    time: TIME_LIMIT,
+                    paused: true,
+                    interval: null
+                };
+            });
+        }
+
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+        }
+
+        function updateTimerDisplay() {
+            const timerElement = document.getElementById('activityTimer');
+            const timeDisplay = document.getElementById('time-display');
+             if (timerElement && sectionTimers[currentSectionId]) {
+                const timerState = sectionTimers[currentSectionId];
+                timeDisplay.textContent = formatTime(timerState.time); // Corrected to update the span
+                timerElement.classList.toggle('paused', timerState.paused);
+                timerElement.classList.toggle('finished', timerState.time <= 0);
+            }
+        }
+
+        function startCurrentSectionTimer() {
+            Object.values(sectionTimers).forEach(timer => {
+                if(timer.interval) clearInterval(timer.interval);
+            });
+            
+            const timerState = sectionTimers[currentSectionId];
+            if (!timerState) return;
+
+            timerState.interval = setInterval(() => {
+                if (!timerState.paused && timerState.time > 0) {
+                    timerState.time--;
+                    updateTimerDisplay();
+                } else if (timerState.time <= 0) {
+                    clearInterval(timerState.interval);
+                    document.getElementById('activityTimer').classList.add('finished');
+                    if (buzzer) buzzer.play();
+                }
+            }, 1000);
+        }
+
+        function toggleTimer() {
+            const timerState = sectionTimers[currentSectionId];
+            if (timerState) {
+                timerState.paused = !timerState.paused;
+                updateTimerDisplay();
+            }
+        }
+        
+        // --- Core Page Navigation (Teacher-provided) ---
+        function showSection(sectionId) {
+            Object.values(sectionTimers).forEach(timer => timer.paused = true);
+            currentSectionId = sectionId;
+            document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.sectionId === sectionId);
+            });
+            const timerState = sectionTimers[currentSectionId];
+            if (timerState) {
+                timerState.paused = false;
+                updateTimerDisplay();
+                startCurrentSectionTimer();
+            }
+        }
+        
+        // --- PDF Download Functionality (Teacher-provided) ---
+        async function downloadSectionAsPDF(sectionId, buttonElement) {
+            const { jsPDF } = window.jspdf;
+            const sectionElement = document.getElementById(sectionId);
+            const sectionTitle = sectionElement.querySelector('h2').innerText;
+
+            const originalButtonText = buttonElement.innerHTML;
+            buttonElement.innerHTML = 'Generating...';
+            buttonElement.disabled = true;
+
+            try {
+                const canvas = await html2canvas(sectionElement, {
+                    scale: 2,
+                    useCORS: true,
+                    logging: false,
+                    onclone: (clonedDoc) => {
+                        // This function ensures the current values of form fields are captured
+                        const originalElements = sectionElement.querySelectorAll('textarea, input, select');
+                        const clonedElements = clonedDoc.querySelectorAll('textarea, input, select');
+                        originalElements.forEach((el, index) => {
+                           if (clonedElements[index]) {
+                                if (el.type === 'checkbox' || el.type === 'radio') {
+                                    clonedElements[index].checked = el.checked;
+                                } else {
+                                    clonedElements[index].value = el.value;
+                                }
+                           }
+                        });
+                    }
+                });
+                
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+
+                const pdfWidth = pdf.internal.pageSize.getWidth() - 20; // Margin
+                const pdfHeight = pdf.internal.pageSize.getHeight();
+                const imgProps = pdf.getImageProperties(imgData);
+                const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+                let heightLeft = imgHeight;
+                let position = 10; // Top margin
+
+                pdf.addImage(imgData, 'PNG', 10, position, pdfWidth, imgHeight, '', 'FAST');
+                heightLeft -= (pdfHeight - 20);
+
+                while (heightLeft > 0) {
+                    position = -(pdfHeight - 20) + (position); 
+                    pdf.addPage();
+                    pdf.addImage(imgData, 'PNG', 10, position, pdfWidth, imgHeight, '', 'FAST');
+                    heightLeft -= (pdfHeight - 20);
+                }
+                pdf.save(`${sectionTitle.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`);
+
+            } catch (error) {
+                console.error("PDF Generation Error:", error);
+                alert("Sorry, there was an error creating the PDF.");
+            } finally {
+                buttonElement.innerHTML = originalButtonText;
+                buttonElement.disabled = false;
+            }
+        }
+        
+        // --- Drag & Drop Logic (Teacher-provided) ---
+        function setupDragAndDrop() {
+            const draggables = document.querySelectorAll('.draggable-item');
+            const dropZones = document.querySelectorAll('.drop-zone');
+            
+            draggables.forEach(draggable => {
+                draggable.addEventListener('dragstart', e => {
+                    e.target.classList.add('dragging');
+                    e.dataTransfer.setData('text/plain', e.target.id);
+                });
+                
+                draggable.addEventListener('dragend', e => {
+                    e.target.classList.remove('dragging');
+                });
+            });
+            
+            dropZones.forEach(zone => {
+                zone.addEventListener('dragover', e => {
+                    e.preventDefault();
+                    zone.classList.add('drag-over');
+                });
+                zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+                zone.addEventListener('drop', e => {
+                    e.preventDefault();
+                    zone.classList.remove('drag-over');
+                    const id = e.dataTransfer.getData('text');
+                    const draggableElement = document.getElementById(id);
+                    if (draggableElement) zone.appendChild(draggableElement);
+                });
+            });
+        }
+
+        // --- Game Logic (Space Invaders) (Teacher-provided) ---
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        let player, invaders, playerBullets, invaderBullets;
+        let gameScore, playerLives, gameOver, gameLoopId;
+        let isGamePaused = true;
+
+        const INVADER_ROWS = 4;
+        const INVADER_COLS = 8;
+        let invaderDirection = 1;
+        let invaderSpeed = 0.3;
+        let invaderDrop = 10;
+        
+        function initGameState() {
+            player = { x: canvas.width / 2 - 25, y: canvas.height - 40, width: 50, height: 20, speed: 5, color: '#00ff00' };
+            playerBullets = [];
+            invaderBullets = [];
+            invaders = [];
+            for (let row = 0; row < INVADER_ROWS; row++) {
+                for (let col = 0; col < INVADER_COLS; col++) {
+                    invaders.push({ 
+                        x: col * 60 + 50, 
+                        y: row * 40 + 30, 
+                        width: 40, 
+                        height: 20, 
+                        color: '#ff00ff', 
+                        alive: true 
+                    });
+                }
+            }
+            gameScore = 0;
+            playerLives = 3;
+            gameOver = false;
+            isGamePaused = true;
+            invaderDirection = 1;
+        }
+
+        function drawGame() {
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            // Draw Player
+            if (playerLives > 0) {
+                ctx.fillStyle = player.color;
+                ctx.fillRect(player.x, player.y, player.width, player.height);
+            }
+            // Draw Invaders
+            invaders.forEach(invader => {
+                if (invader.alive) {
+                    ctx.fillStyle = invader.color;
+                    ctx.fillRect(invader.x, invader.y, invader.width, invader.height);
+                }
+            });
+            // Draw Bullets
+            ctx.fillStyle = '#ffff00'; // Player bullets
+            playerBullets.forEach(bullet => ctx.fillRect(bullet.x, bullet.y, 4, 10));
+            ctx.fillStyle = '#ff4d4d'; // Invader bullets
+            invaderBullets.forEach(bullet => ctx.fillRect(bullet.x, bullet.y, 4, 10));
+            
+            // Draw UI
+            ctx.fillStyle = '#fff';
+            ctx.font = '16px "Press Start 2P"';
+            ctx.fillText(`Score: ${gameScore}`, 10, 25);
+            ctx.fillText(`Lives: ${playerLives}`, canvas.width - 150, 25);
+
+            if (gameOver) {
+                ctx.fillStyle = 'red';
+                ctx.font = '40px "Press Start 2P"';
+                ctx.textAlign = 'center';
+                ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2);
+            }
+            if (invaders.every(inv => !inv.alive)) {
+                ctx.fillStyle = 'green';
+                ctx.font = '40px "Press Start 2P"';
+                ctx.textAlign = 'center';
+                ctx.fillText('YOU WIN!', canvas.width / 2, canvas.height / 2);
+                gameOver = true;
+            }
+        }
+
+        let invaderMoveCounter = 0;
+        function updateGame() {
+            if (gameOver) return;
+            // Player movement
+            if (keys['ArrowLeft'] && player.x > 0) player.x -= player.speed;
+            if (keys['ArrowRight'] && player.x < canvas.width - player.width) player.x += player.speed;
+            
+            // Update player bullets
+            for (let i = playerBullets.length - 1; i >= 0; i--) {
+                playerBullets[i].y -= 7;
+                if (playerBullets[i].y < 0) {
+                    playerBullets.splice(i, 1);
+                    continue;
+                }
+                for (let j = invaders.length - 1; j >= 0; j--) {
+                    if (invaders[j].alive && playerBullets[i] && isColliding(playerBullets[i], {w:4, h:10}, invaders[j], {w:invaders[j].width, h:invaders[j].height})) {
+                        invaders[j].alive = false;
+                        playerBullets.splice(i, 1);
+                        gameScore += 10;
+                        break;
+                    }
+                }
+            }
+
+            // Update invader bullets
+            for (let i = invaderBullets.length - 1; i >= 0; i--) {
+                invaderBullets[i].y += 5;
+                if (invaderBullets[i].y > canvas.height) {
+                    invaderBullets.splice(i, 1);
+                    continue;
+                }
+                if (isColliding(invaderBullets[i], {w:4, h:10}, player, {w:player.width, h:player.height})) {
+                    invaderBullets.splice(i, 1);
+                    playerLives--;
+                    if(playerLives <= 0) gameOver = true;
+                }
+            }
+
+            // Invader movement & shooting logic
+            invaderMoveCounter++;
+            if (invaderMoveCounter > 30) { // Slow down invader movement
+                invaderMoveCounter = 0;
+                let moveDown = false;
+                for (const invader of invaders) {
+                    if (invader.alive) {
+                        invader.x += 10 * invaderDirection;
+                        if (invader.x + invader.width > canvas.width || invader.x < 0) {
+                            moveDown = true;
+                        }
+                    }
+                }
+                if (moveDown) {
+                    invaderDirection *= -1;
+                    invaders.forEach(invader => {
+                        invader.y += invaderDrop;
+                        if(invader.alive && invader.y + invader.height >= player.y) gameOver = true;
+                    });
+                }
+
+                // Invader shooting
+                 const aliveInvaders = invaders.filter(inv => inv.alive);
+                 if (aliveInvaders.length > 0) {
+                     const shooter = aliveInvaders[Math.floor(Math.random() * aliveInvaders.length)];
+                     invaderBullets.push({ x: shooter.x + shooter.width / 2 - 2, y: shooter.y + shooter.height });
+                 }
+            }
+        }
+        
+        function isColliding(obj1, size1, obj2, size2) {
+             return obj1.x < obj2.x + size2.w &&
+                    obj1.x + size1.w > obj2.x &&
+                    obj1.y < obj2.y + size2.h &&
+                    obj1.y + size1.h > obj2.y;
+        }
+
+        function gameLoop() {
+            if (!isGamePaused) {
+                updateGame();
+                drawGame();
+                gameLoopId = requestAnimationFrame(gameLoop);
+            }
+        }
+        
+        const keys = {};
+        let lastShotTime = 0;
+        window.addEventListener('keydown', e => {
+            keys[e.key] = true;
+            if (e.code === 'Space' && !isGamePaused && !gameOver) {
+                e.preventDefault();
+                const now = Date.now();
+                if (now - lastShotTime > 500) { // Limit shooting to every 500ms
+                    playerBullets.push({ x: player.x + player.width / 2 - 2, y: player.y });
+                    lastShotTime = now;
+                }
+            }
+        });
+        window.addEventListener('keyup', e => { keys[e.key] = false; });
+        
+        function startGame() {
+            if (gameOver) resetGame();
+            if (isGamePaused) {
+                isGamePaused = false;
+                gameLoop();
+            }
+        }
+        function pauseGame() { isGamePaused = !isGamePaused; if (!isGamePaused) gameLoop(); }
+        function resetGame() {
+            cancelAnimationFrame(gameLoopId);
+            initGameState();
+            drawGame();
+        }
+
+        // ===================================================================================
+        // ACTIVITY 1: ENTRY TICKET
+        // ===================================================================================
+        function submitEntryTicket() { 
+            // TASK 1: Get the two textarea elements by their ID ('priorKnowledge1', 'priorKnowledge2').
+            // Use document.getElementById()
+            const input1 = document.getElementById('priorKnowledge1');
+            const input2 = document.getElementById('priorKnowledge2');
+
+            // TASK 2: Get the feedback div element by its ID ('entryFeedback').
+            const feedbackEl = document.getElementById('entryFeedback');
+
+            // TASK 3: Check if BOTH textareas have some text in them.
+            // The .trim() method removes whitespace from the start and end of a string.
+            // We check if the trimmed value's length is greater than 0.
+            if (input1.value.trim().length > 0 && input2.value.trim().length > 0) {
+                // TASK 4: If both are filled, call showFeedback() with 'success' and a positive message.
+                showFeedback('success', 'Entry ticket submitted! Great start!', 'entryFeedback');
+                
+                // CHALLENGE: Play a success sound when the ticket is submitted correctly.
+                // The sound element with id 'successSound' is already in the HTML.
+                // Use .play() on the element to play it.
+                document.getElementById('successSound').play();
+
+            } else {
+                // TASK 5: If one or both are empty, call showFeedback() with 'error' and an error message.
+                showFeedback('error', 'Please answer both questions before submitting.', 'entryFeedback');
+            }
+        }
+        
+        // ===================================================================================
+        // ACTIVITY 2: SORTING REQUIREMENTS
+        // ===================================================================================
+        function checkSorting() {
+            // TASK 1: Get the two drop zone elements by their IDs.
+            const functionalZone = document.getElementById('functionalDrop');
+            const nonFunctionalZone = document.getElementById('nonFunctionalDrop');
+            
+            // This variable will count how many items are sorted correctly.
+            let correctCount = 0;
+            
+            // TASK 2: Loop through each item dropped in the 'functional' zone.
+            // Use functionalZone.querySelectorAll('.draggable-item') to get all items inside it.
+            functionalZone.querySelectorAll('.draggable-item').forEach(item => {
+                // The correct type is stored in the 'data-type' attribute.
+                // Check if item.dataset.type is 'functional'.
+                if (item.dataset.type === 'functional') {
+                    // If correct, add the 'correct' class and remove 'incorrect'.
+                    item.classList.add('correct');
+                    item.classList.remove('incorrect');
+                    correctCount++; // Increment the score
+                } else {
+                    // If incorrect, add the 'incorrect' class and remove 'correct'.
+                    item.classList.add('incorrect');
+                    item.classList.remove('correct');
+                }
+            });
+
+            // TASK 3: Do the same for the 'non-functional' zone.
+            nonFunctionalZone.querySelectorAll('.draggable-item').forEach(item => {
+                // Check if item.dataset.type is 'non-functional'.
+                if (item.dataset.type === 'non-functional') {
+                    item.classList.add('correct');
+                    item.classList.remove('incorrect');
+                    correctCount++;
+                } else {
+                    item.classList.add('incorrect');
+                    item.classList.remove('correct');
+                }
+            });
+
+            // TASK 4: Display feedback based on the final score.
+            const totalItems = 6; // We have 6 draggable items in total.
+            if (correctCount === totalItems) {
+                // If all are correct, show a success message.
+                showFeedback('success', `Perfect! All ${totalItems} sorted correctly!`, 'sortingFeedback');
+            } else {
+                // Otherwise, show an error message with the number they got right.
+                showFeedback('error', `You got ${correctCount} out of ${totalItems} correct. Try again!`, 'sortingFeedback');
+            }
+
+            // CHALLENGE: Update the points in the header.
+            // Add 10 points for each correctly sorted item.
+            // First, get the points element by its ID 'points'.
+            // Then, update its textContent with the new score.
+            points = correctCount * 10;
+            document.getElementById('points').textContent = points;
+        }
+
+        // ===================================================================================
+        // ACTIVITY 4: APPLY YOUR KNOWLEDGE
+        // ===================================================================================
+        function selectGame(element, gameName) {
+            // TASK 1: Remove the 'selected' class from ALL quiz options.
+            // First, select all elements with the class '.quiz-option' inside the '#section4' element.
+            // Then, loop through them and remove the 'selected' class from each one.
+            document.querySelectorAll('#section4 .quiz-option').forEach(opt => opt.classList.remove('selected'));
+            
+            // TASK 2: Add the 'selected' class to the specific element that was clicked.
+            // The 'element' that was clicked is passed into this function as an argument.
+            element.classList.add('selected');
+            
+            // TASK 3: Make the analysis section visible.
+            // Get the element with ID 'gameAnalysis' and set its style.display to 'block'.
+            document.getElementById('gameAnalysis').style.display = 'block';
+            
+            // TASK 4: Update the title to show which game was chosen.
+            // Get the element with ID 'chosenGameName' and set its textContent to the 'gameName'.
+            document.getElementById('chosenGameName').textContent = gameName;
+
+            // CHALLENGE: When a new game is selected, clear any text from the input fields.
+            // Select all inputs inside the 'gameAnalysis' div.
+            // Loop through them and set their 'value' to an empty string ''.
+            document.querySelectorAll('#gameAnalysis input[type="text"]').forEach(input => {
+                input.value = '';
+            });
+        }
+
+        // --- Helper Functions (Teacher-provided) ---
+        function createStars() {
+            const starsContainer = document.querySelector('.stars');
+            if (!starsContainer) return;
+            const starCount = 100; // Number of stars
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.animationDelay = `${Math.random() * 3}s`;
+                starsContainer.appendChild(star);
+            }
+        }
+
+        function showFeedback(type, message, elementId) {
+            const feedbackElement = document.getElementById(elementId);
+            if (feedbackElement) {
+                feedbackElement.className = `feedback ${type}`;
+                feedbackElement.textContent = message;
+                feedbackElement.style.display = 'block';
+            }
+        }
+
+        // --- Initial Load (Teacher-provided) ---
+        document.addEventListener('DOMContentLoaded', () => {
+            createStars();
+            setupDragAndDrop();
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.addEventListener('click', () => showSection(tab.dataset.sectionId));
+            });
+            initializeTimers();
+            showSection('section1');
+            initGameState();
+            drawGame(); // Draw initial placeholder state
+        });
+    </script>
+</body>
+</html>
+
